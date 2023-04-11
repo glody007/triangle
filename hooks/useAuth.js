@@ -2,15 +2,23 @@ import React, {
     createContext, 
     useContext,
     useState,
-    useEffect
+    useEffect,
+    useMemo
 } from 'react'
 import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
+import {
+    GoogleAuthProvider,
+    signInWithCredential,
+    onAuthStateChanged,
+    signOut
+} from "firebase/auth"
 import { 
     IOS_CLIENT_ID,
     ANDROID_CLIENT_ID,
     EXPO_CLIENT_ID
 } from '@env'
+import { auth } from "../firebase"
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -18,7 +26,10 @@ const AuthContext = createContext({})
 
 export function AuthProvider({ children }) {
     const [token, setToken] = useState("");
-    const [userInfo, setUserInfo] = useState(null);
+    const [user, setUser] = useState(null);
+    const [error, setError] = useState(false)
+    const [loadingInitial, setLoadingInitial] = useState(true)
+    const [loading, setLoading] = useState(false)
 
     const [request, response, promptAsync] = Google.useAuthRequest({
         iosClientId: IOS_CLIENT_ID,
@@ -26,10 +37,34 @@ export function AuthProvider({ children }) {
         expoClientId: EXPO_CLIENT_ID
     })
 
+    const firebaseSignIn = async (authentication) => {
+        const {idToken, accessToken} = authentication
+        const credential = GoogleAuthProvider.credential(idToken, accessToken)
+        
+        await signInWithCredential(auth, credential)
+    }
+
+    useEffect(
+        () => onAuthStateChanged(auth, (user) => {
+            if(user) {
+                setUser(user)
+            } else {
+                setUser(null)
+            }
+
+            setLoadingInitial(false)
+        }),
+        []
+    )
+
     useEffect(() => {
         if (response?.type === "success") {
+            setLoading(true)
+
             setToken(response.authentication.accessToken);
-            getUserInfo();
+            firebaseSignIn(response.authentication)
+                .catch(error => setError(error))
+                .finally(() => setLoading(false))
         }
     }, [response, token]);
 
@@ -43,20 +78,46 @@ export function AuthProvider({ children }) {
           );
     
           const user = await response.json();
-          setUserInfo(user);
+          setUser(user);
         } catch (error) {
           // Add error handler here
         }
     };
 
+    const googleAuth = () => {
+        promptAsync()
+    }
+
+    const logout = () => {
+        setLoading(true) 
+
+        signOut(auth)
+            .catch((error) => setError(error)) 
+            .finally(() => setLoading(false))       
+    }
+
+    const memoedValue = useMemo(
+        () => ({
+            user,
+            token,
+            googleAuth,
+            logout,
+            loading,
+            error
+        }),
+        [user, token, loading, error, googleAuth]
+    )
+
     return (
         <AuthContext.Provider value={{
-            user: userInfo,
-            toke: token,
-            googleAuth: () => promptAsync({ useProxy: true }),
-            logout: () => setUserInfo(null)
+            user,
+            token,
+            googleAuth,
+            logout,
+            loading,
+            error
         }}>
-            {children}
+            {!loadingInitial && children}
         </AuthContext.Provider>
     )
 }
