@@ -53,7 +53,8 @@ export function AuthProvider({ children }) {
         <AuthContext.Provider value={{
             user: userInfo,
             toke: token,
-            googleAuth: () => promptAsync({ useProxy: true })
+            googleAuth: () => promptAsync({ useProxy: true }),
+            logout: () => setUserInfo(null)
         }}>
             {children}
         </AuthContext.Provider>
