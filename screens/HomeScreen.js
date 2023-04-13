@@ -84,6 +84,49 @@ export default function HomeScreen() {
                             <UserCard card={card} />
                         )
                     }}
+                    overlayLabels={{
+                        left: {
+                            title: 'NOPE',
+                            style: {
+                                label: {
+                                  backgroundColor: 'transparent',
+                                  borderColor: '#FF5864',
+                                  color: '#FF5864',
+                                  borderWidth: 4
+                                },
+                                wrapper: {
+                                    flexDirection: 'column',
+                                    alignItems: 'flex-end',
+                                    justifyContent: 'flex-start',
+                                    transform: [
+                                        {rotate: '30deg'}, 
+                                        {translateY: 40}, 
+                                        {translateX: -200}
+                                    ]
+                                }
+                            }
+                          },
+                          right: {
+                            title: 'LIKE',
+                            style: {
+                                label: {
+                                    backgroundColor: 'transparent',
+                                    borderColor: '#2dd4bf',
+                                    color: '#2dd4bf',
+                                    borderWidth: 4
+                                },
+                                wrapper: {
+                                    flexDirection: 'column',
+                                    alignItems: 'flex-start',
+                                    transform: [
+                                        {rotate: '-30deg'}, 
+                                        {translateY: 40}, 
+                                        {translateX: 200}
+                                    ]
+                                }
+                            }
+                          },
+                    }}
                     verticalSwipe={false}
                     animateCardOpacity
                     onSwiped={(cardIndex) => {console.log(cardIndex)}}
