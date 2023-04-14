@@ -2,8 +2,7 @@ import {
     View, 
     Text, 
     TouchableOpacity,
-    Image,
-    SafeAreaView
+    Image
 } from 'react-native'
 import React, { useRef } from 'react'
 import { Ionicons } from '@expo/vector-icons';
@@ -12,6 +11,8 @@ import { AntDesign } from '@expo/vector-icons';
 import useAuth from '../hooks/useAuth'
 import Swiper from 'react-native-deck-swiper';
 import UserCard from '../components/UserCard';
+import { useNavigation } from '@react-navigation/native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const DUMMY_DATA = [
     {
@@ -54,6 +55,7 @@ const DUMMY_DATA = [
 export default function HomeScreen() {
     const { logout, user } = useAuth()
     const swiperRef = useRef()
+    const navigation = useNavigation()
 
     return (
         <SafeAreaView className="flex-1">
@@ -67,7 +69,7 @@ export default function HomeScreen() {
                         className="h-10 w-10 rounded-full"
                     />
                 </TouchableOpacity>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => navigation.navigate('IdentityScreen')}>
                     <Image 
                         source={require('../assets/logo.png')}
                         className="h-16 w-16 rounded-full"
