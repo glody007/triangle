@@ -4,22 +4,29 @@ import {
   Image, 
   TouchableOpacity
 } from 'react-native'
-import React from 'react'
+import React, { useLayoutEffect } from 'react'
 import useAuth from '../hooks/useAuth'
+import { onSnapshot } from 'firebase/firestore'
 
 export default function NoProfile() {
   const { user } = useAuth()
+
+  useLayoutEffect(() => {
+    onSnapshot
+  }, [])
 
   return (
     <View className="flex-1 justify-center items-center">
       <View className="bg-red-50 rounded-full p-6 border-red-200 border">
         <View className="bg-red-100 rounded-full p-2 border-red-200 border">
-          <Image 
-              source={{
-                  uri: user.photoURL
-              }}
-              className="h-14 w-14 rounded-full border-white border-2"
-          />
+          <View className="border-white border rounded-full">
+            <Image 
+                source={{
+                    uri: user.photoURL
+                }}
+                className="h-14 w-14 rounded-full"
+            />
+          </View>
         </View>
       </View>
 
