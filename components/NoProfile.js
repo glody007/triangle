@@ -6,14 +6,9 @@ import {
 } from 'react-native'
 import React, { useLayoutEffect } from 'react'
 import useAuth from '../hooks/useAuth'
-import { onSnapshot } from 'firebase/firestore'
 
 export default function NoProfile() {
   const { user } = useAuth()
-
-  useLayoutEffect(() => {
-    onSnapshot
-  }, [])
 
   return (
     <View className="flex-1 justify-center items-center">
