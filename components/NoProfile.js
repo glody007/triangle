@@ -12,8 +12,8 @@ export default function NoProfile() {
 
   return (
     <View className="flex-1 justify-center items-center">
-      <View className="bg-red-50 rounded-full p-8 border-red-200 border-2">
-        <View className="bg-red-100 rounded-full p-4 border-red-200 border-2">
+      <View className="bg-red-50 rounded-full p-6 border-red-200 border">
+        <View className="bg-red-100 rounded-full p-2 border-red-200 border">
           <Image 
               source={{
                   uri: user.photoURL
