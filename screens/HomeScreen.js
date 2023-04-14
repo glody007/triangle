@@ -11,6 +11,7 @@ import { AntDesign } from '@expo/vector-icons';
 import useAuth from '../hooks/useAuth'
 import Swiper from 'react-native-deck-swiper';
 import UserCard from '../components/UserCard';
+import NoProfile from '../components/NoProfile';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -82,14 +83,11 @@ export default function HomeScreen() {
 
             {/* Body */}
             <View className="flex-1 -mt-6">
+                <NoProfile />
                 <Swiper
                     ref={swiperRef}
                     cards={DUMMY_DATA}
-                    renderCard={(card) => {
-                        return (
-                            <UserCard card={card} />
-                        )
-                    }}
+                    renderCard={(card) => user ? <UserCard card={card} /> : <NoProfileCard />}
                     overlayLabels={{
                         left: {
                             title: 'NOPE',
@@ -141,9 +139,12 @@ export default function HomeScreen() {
                     onSwipedRight={(cardIndex) => {
                         console.log(`Card ${cardIndex} swiped LIKE`)
                     }}
+                    onSwipedAll={(
+                        console.log('Swiped ALL')
+                    )}
                     cardIndex={0}
                     backgroundColor={'transparent'}
-                    stackSize= {5}>
+                    stackSize={5}>
                 </Swiper>
             </View>
 
