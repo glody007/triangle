@@ -19,7 +19,7 @@ import UserCard from '../components/UserCard';
 import NoProfile from '../components/NoProfile';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { collection, doc, onSnapshot } from 'firebase/firestore'
+import { collection, doc, getDocs, onSnapshot, query, setDoc, where } from 'firebase/firestore'
 import { db } from '../firebase'
 
 
@@ -43,21 +43,49 @@ export default function HomeScreen() {
         let unsub;
 
         const fetchProfiles = async () => {
-            unsub = onSnapshot(collection(db, 'users'), (snapshot) => {
-                setProfiles(
-                    snapshot.docs
-                        .filter((doc) => doc.id !== user.uid)
-                        .map((doc) => ({
-                            id: doc.id,
-                            ...doc.data()
-                        }))
-                )
+            const passes = await getDocs(collection(db, "users", user.uid, "passes")).then(
+                (snapshot) => snapshot.docs.map((doc) => doc.id) 
+            )
+
+            const likes = await getDocs(collection(db, "users", user.uid, "likes")).then(
+                (snapshot) => snapshot.docs.map((doc) => doc.id) 
+            )
+
+            const passedUserIds = passes.length > 0 ? passes : [''];
+            const likedUserIds = passes.length > 0 ? likes : [''];
+
+            unsub = onSnapshot(
+                query(
+                    collection(db, 'users'),
+                    where("id", "not-in", [...passedUserIds, ...likedUserIds])
+                ), 
+                (snapshot) => {
+                    setProfiles(
+                        snapshot.docs
+                            .filter((doc) => doc.id !== user.uid)
+                            .map((doc) => ({
+                                id: doc.id,
+                                ...doc.data()
+                            }))
+                    )
             })
         }
 
         fetchProfiles()
         return unsub
     }, [])
+
+    const swipeLeft = (cardIndex) => {
+        const swipedUser = profiles[cardIndex]
+        if(!swipedUser) return;
+        setDoc(doc(db, 'users', user.uid, 'passes', swipedUser.id), swipedUser) 
+    }
+
+    const swipeRight = (cardIndex) => {
+        const swipedUser = profiles[cardIndex]
+        if(!swipedUser) return;
+        setDoc(doc(db, 'users', user.uid, 'likes', swipedUser.id), swipedUser) 
+    }
 
     return (
         <SafeAreaView className="flex-1">
@@ -134,12 +162,8 @@ export default function HomeScreen() {
                     }}
                     verticalSwipe={false}
                     animateCardOpacity
-                    onSwipedLeft={(cardIndex) => {
-                        console.log(`Card ${cardIndex} swiped NONE`)
-                    }}
-                    onSwipedRight={(cardIndex) => {
-                        console.log(`Card ${cardIndex} swiped LIKE`)
-                    }}
+                    onSwipedLeft={swipeLeft}
+                    onSwipedRight={swipeRight}
                     onSwipedAll={(
                         console.log('Swiped ALL')
                     )}
