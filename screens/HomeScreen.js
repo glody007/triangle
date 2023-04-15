@@ -4,7 +4,12 @@ import {
     TouchableOpacity,
     Image
 } from 'react-native'
-import React, { useRef } from 'react'
+import React, { 
+    useRef, 
+    useLayoutEffect, 
+    useEffect,
+    useState 
+} from 'react'
 import { Ionicons } from '@expo/vector-icons';
 import { Entypo } from '@expo/vector-icons';
 import { AntDesign } from '@expo/vector-icons';
@@ -14,49 +19,45 @@ import UserCard from '../components/UserCard';
 import NoProfile from '../components/NoProfile';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { collection, doc, onSnapshot } from 'firebase/firestore'
+import { db } from '../firebase'
 
-const DUMMY_DATA = [
-    {
-        firstName: "Kalash",
-        lastName: "Criminel",
-        occupation: "Singer",
-        photoURL: "https://www.lalibre.be/resizer/k5_yG4xruQAq4jtsj41CXCr_0pA=/0x201:1706x1334/1200x800/filters:format(jpeg)/cloudfront-eu-central-1.images.arcpublishing.com/ipmgroup/CID3DIATEVEY3AFXVG6DBAA52Q.jpg",
-        age: 27
-    },
-    {
-        firstName: "Maitre",
-        lastName: "Yoda",
-        occupation: "Jedi",
-        photoURL: "https://www.projet-voltaire.fr/pv-wp/wp-content/uploads/2015/05/Ton-pere-il-est-Yoda-grand-maitre-de-lanastrophe-918x1024.jpg",
-        age: 1000
-    },
-    {
-        firstName: "Ada",
-        lastName: "Lovelace",
-        occupation: "Software Developer",
-        photoURL: "https://www.bibmath.net/bios/images/lovelace.jpg",
-        age: 1000
-    },
-    {
-        firstName: "Donald",
-        lastName: "Knuth",
-        occupation: "Software Developer",
-        photoURL: "https://static01.nyt.com/images/2018/12/18/science/18SCI-KNUTH1/merlin_148126767_cd44bb13-bc4d-4eeb-b1b7-73cc4dc174e7-articleLarge.jpg?quality=75&auto=webp&disable=upscale",
-        age: 80
-    },
-    {
-        firstName: "Grace",
-        lastName: "Hopper",
-        occupation: "Compiler Developer",
-        photoURL: "https://hips.hearstapps.com/hmg-prod/images/gettyimages-515352074.jpg",
-        age: 1000
-    },
-]
 
 export default function HomeScreen() {
     const { logout, user } = useAuth()
     const swiperRef = useRef()
     const navigation = useNavigation()
+    const [profiles, setProfiles] = useState([])
+
+    useLayoutEffect(() => {
+        const unsub = onSnapshot(doc(db, 'users', user.uid), (snapshot) => {
+            if(!snapshot.exists()) {
+                navigation.navigate('IdentityScreen')
+            }
+        })
+
+        return unsub
+    }, [])
+
+    useEffect(() => {
+        let unsub;
+
+        const fetchProfiles = async () => {
+            unsub = onSnapshot(collection(db, 'users'), (snapshot) => {
+                setProfiles(
+                    snapshot.docs
+                        .filter((doc) => doc.id !== user.uid)
+                        .map((doc) => ({
+                            id: doc.id,
+                            ...doc.data()
+                        }))
+                )
+            })
+        }
+
+        fetchProfiles()
+        return unsub
+    }, [])
 
     return (
         <SafeAreaView className="flex-1">
@@ -86,8 +87,8 @@ export default function HomeScreen() {
                 <NoProfile />
                 <Swiper
                     ref={swiperRef}
-                    cards={DUMMY_DATA}
-                    renderCard={(card) => user ? <UserCard card={card} /> : <NoProfileCard />}
+                    cards={profiles}
+                    renderCard={(card) => card ? <UserCard card={card} /> : <></>}
                     overlayLabels={{
                         left: {
                             title: 'NOPE',
