@@ -19,7 +19,17 @@ import UserCard from '../components/UserCard';
 import NoProfile from '../components/NoProfile';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { collection, doc, getDocs, onSnapshot, query, setDoc, where } from 'firebase/firestore'
+import { 
+    collection, 
+    doc, 
+    getDoc, 
+    getDocs, 
+    onSnapshot, 
+    query, 
+    serverTimestamp, 
+    setDoc, 
+    where 
+} from 'firebase/firestore'
 import { db } from '../firebase'
 
 
@@ -52,7 +62,7 @@ export default function HomeScreen() {
             )
 
             const passedUserIds = passes.length > 0 ? passes : [''];
-            const likedUserIds = passes.length > 0 ? likes : [''];
+            const likedUserIds = likes.length > 0 ? likes : [''];
 
             unsub = onSnapshot(
                 query(
@@ -78,13 +88,33 @@ export default function HomeScreen() {
     const swipeLeft = (cardIndex) => {
         const swipedUser = profiles[cardIndex]
         if(!swipedUser) return;
+        // Add swipped user to list of passes of logged in user
         setDoc(doc(db, 'users', user.uid, 'passes', swipedUser.id), swipedUser) 
     }
 
-    const swipeRight = (cardIndex) => {
+    const swipeRight = async (cardIndex) => {
         const swipedUser = profiles[cardIndex]
         if(!swipedUser) return;
+        // Add swipped user to list of likes of logged user
         setDoc(doc(db, 'users', user.uid, 'likes', swipedUser.id), swipedUser) 
+
+        const loggedInProfile = (await getDoc(doc(db, 'users', user.uid))).data()
+
+        getDoc(doc(db, 'users', swipedUser.id, 'likes', loggedInProfile.id))
+            .then((snapshot) => {
+                // If swipped user likes logged user, create a match
+                if(snapshot.exists()) {
+                    setDoc(doc(db, 'matches', user.uid + swipedUser.id), {
+                        users: {
+                            [user.uid]: loggedInProfile,
+                            [swipedUser.id]: swipedUser
+                        },
+                        usersMatched: [user.uid, swipedUser.id],
+                        timestamp: serverTimestamp()
+                    }) 
+                    navigation.navigate('MatchScreen')
+                }
+            })
     }
 
     return (

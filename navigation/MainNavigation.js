@@ -3,6 +3,7 @@ import HomeScreen from '../screens/HomeScreen';
 import ChatScreen from '../screens/ChatScreen';
 import LoginScreen from '../screens/LoginScreen';
 import IdentityScreen from '../screens/IdentityScreen';
+import MatchScreen from '../screens/MatchScreen';
 import useAuth from "../hooks/useAuth"
 
 const Stack = createNativeStackNavigator()
@@ -26,6 +27,11 @@ export default function MainNavigation() {
               presentation: 'modal'
             }}>
               <Stack.Screen name="IdentityScreen" component={IdentityScreen} />
+            </Stack.Group>
+            <Stack.Group screenOptions={{
+              presentation: 'transparentModal'
+            }}>
+              <Stack.Screen name="MatchScreen" component={MatchScreen} />
             </Stack.Group>
           </>
         ) : (
