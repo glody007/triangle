@@ -135,7 +135,7 @@ export default function HomeScreen() {
                         className="h-16 w-16 rounded-full"
                     />
                 </TouchableOpacity>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => navigation.navigate('ChatScreen')}>
                     <Ionicons name="chatbubbles" size={30} color="#FF5864" />
                 </TouchableOpacity>
             </View>
