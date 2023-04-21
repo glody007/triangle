@@ -9,7 +9,7 @@ import { Entypo } from '@expo/vector-icons';
 export default function PictureCard({ photoURL }) {
   return (
     <TouchableOpacity 
-      disabled={photoURL} 
+      disabled={photoURL !== ''} 
       className={`relative h-40 bg-slate-100 rounded-xl ${!photoURL && "border-dashed border-gray-300 border-2"}`}
     >
       {photoURL ? (
