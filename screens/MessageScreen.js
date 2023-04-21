@@ -12,7 +12,7 @@ import React, { useEffect, useState } from 'react'
 import { KeyboardAvoidingView, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { addDoc, collection, doc, onSnapshot, query, serverTimestamp } from 'firebase/firestore';
+import { addDoc, collection, doc, onSnapshot, orderBy, query, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 import useAuth from '../hooks/useAuth';
 import getMatchedUser from '../lib/getMatchedUser';
@@ -33,7 +33,8 @@ export default function MessageScreen() {
         const fetchMessages = async () => {
             unsub = onSnapshot(
                 query(
-                    collection(db, 'matches', matchedUsers.id, 'messages')
+                    collection(db, 'matches', matchedUsers.id, 'messages'),
+                    orderBy("timestamp", "desc")
                 ), 
                 (snapshot) => {
                     setMessages(
@@ -51,6 +52,8 @@ export default function MessageScreen() {
     }, [])
 
     const sendMessage = () => {
+        if(inputText === '') return;
+
         addDoc(collection(db, 'matches', matchedUsers.id, 'messages'), {
             timestamp: serverTimestamp(),
             senderId: user.uid,
@@ -118,7 +121,9 @@ export default function MessageScreen() {
                                 onChangeText={(text) => setInputText(text)}
                             />
                             <TouchableOpacity onPress={sendMessage}>
-                                <Text className="font-bold text-gray-500">
+                                <Text 
+                                    className={`font-bold text-gray-500 ${inputText === '' && 'text-gray-400'}`}
+                                >
                                     ENVOYER
                                 </Text>
                             </TouchableOpacity>
