@@ -11,7 +11,7 @@ import useAuth from '../hooks/useAuth'
 import { db } from '../firebase'
 import getMatchedUser from '../lib/getMatchedUser'
 
-export default function ChatList({ users }) {
+export default function ChatList() {
     const { user } = useAuth()
     const [matchedUsers, setMatchedUsers] = useState([])
 
@@ -25,7 +25,11 @@ export default function ChatList({ users }) {
                     where("usersMatched", "array-contains", user.uid)
                 ), 
                 (snapshot) => { 
-                    const matchedUsers = snapshot.docs.map(doc => getMatchedUser(doc.data()))  
+                    const matchedUsers = snapshot.docs
+                                            .map(doc => ({
+                                                id: doc.id,
+                                                ...doc.data()
+                                            }))  
                     setMatchedUsers(matchedUsers) 
                 }
             )
@@ -39,7 +43,7 @@ export default function ChatList({ users }) {
         <FlatList 
             data={matchedUsers}
             keyExtractor={(item) => item.id}
-            renderItem={({item}) => <ChatRow user={item} />}
+            renderItem={({item}) => <ChatRow matchedUsers={item} />}
         />
     )
 }
