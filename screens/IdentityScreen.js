@@ -19,9 +19,9 @@ export default function IdentityScreen() {
     const { user } = useAuth()
     const navigation = useNavigation()
 
-    const [age, setAge] = useState()
-    const [job, setJob] = useState()
-    const [photoURL, setPhotoUrl] = useState()
+    const [age, setAge] = useState('')
+    const [job, setJob] = useState('')
+    const [photoURL, setPhotoUrl] = useState('')
 
     const isFormInvalid = !age || !job || !photoURL
 
