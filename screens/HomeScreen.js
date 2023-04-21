@@ -121,7 +121,7 @@ export default function HomeScreen() {
         <SafeAreaView className="flex-1">
             {/* Header */}
             <View className="flex-row items-center justify-between mx-4">
-                <TouchableOpacity>
+                <TouchableOpacity onPress={logout}>
                     <Image 
                         source={{
                             uri: user.photoURL
