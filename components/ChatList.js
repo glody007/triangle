@@ -9,6 +9,7 @@ import {
 } from 'firebase/firestore'
 import useAuth from '../hooks/useAuth'
 import { db } from '../firebase'
+import getMatchedUser from '../lib/getMatchedUser'
 
 export default function ChatList({ users }) {
     const { user } = useAuth()
@@ -24,12 +25,7 @@ export default function ChatList({ users }) {
                     where("usersMatched", "array-contains", user.uid)
                 ), 
                 (snapshot) => { 
-                    const matchedUsers = snapshot.docs.map(doc => {
-                        const users = {...doc.data().users}
-                        delete users[user.uid]
-                        const [matchedUserId, matchedUser] = Object.entries(users).flat()
-                        return matchedUser
-                    })  
+                    const matchedUsers = snapshot.docs.map(doc => getMatchedUser(doc.data()))  
                     setMatchedUsers(matchedUsers) 
                 }
             )
